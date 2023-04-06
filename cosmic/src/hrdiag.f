@@ -48,7 +48,7 @@
       real*8 frac,kappa,sappa,alphap,polyfit
       real*8 am,xx,fac,rdgen,mew,lum0,kap,zeta,ahe,aco
       parameter(lum0=7.0d+04,kap=-0.5d0,ahe=4.d0,aco=16.d0)
-      parameter(piflag=1)
+      parameter(piflag=2)
 *
       real*8 thookf,tblf
       real*8 lalphf,lbetaf,lnetaf,lhookf,lgbtf,lmcgbf,lzhef,lpertf
@@ -61,7 +61,7 @@
       external rzamsf,rtmsf,ralphf,rbetaf,rgammf,rhookf
       external rgbf,rminf,ragbf,rzahbf,rzhef,rhehgf,rhegbf,rpertf
       external mctmsf,mcgbtf,mcgbf,mcheif,mcagbf,lzahbf
-      real*8 sigmaSN,theta,delta
+      real*8 sigmaSN,thetaSN,delta,betaSN
       real*8 pisn_correction,rcore_RGB,rcore_TPAGB,pisnM
       external rcore_RGB,rcore_TPAGB,pisnM
 *
@@ -592,38 +592,38 @@ C      if(mt0.gt.100.d0) mt = 100.d0
 * RAPID SN explosion by Spera et al. 2015, MNRAS, 451
 *
                         if(mc.lt.2.5d0)then
-                            theta = 0.0d0
-                            beta = 0.2d0/(mt - 1.d0)
+                            thetaSN = 0.0d0
+                            betaSN = 0.2d0/(mt - 1.d0)
                             sigmaSN = 0.0d0
                             delta = 1.0d0
                         elseif(2.5d0.le.mc .and. mc.lt.6.0d0)then
-                            theta = 0.0d0
-                            beta = (0.286d0*mc - 0.514d0)/(mt - 1.0d0)
+                            thetaSN = 0.0d0
+                            betaSN = (0.286d0*mc- 0.514d0)/(mt - 1.0d0)
                             sigmaSN = 0.0d0
                             delta = 1.0d0
                         elseif(6.0d0.le.mc .and. mc.lt.7.0d0)then
-                            theta = 0.0d0
-                            beta = 1.0d0
+                            thetaSN = 0.0d0
+                            betaSN = 1.0d0
                             sigmaSN = 0.0d0
                             delta = 1.0d0
 *
-                            directcollapse = 1
+*                            directcollapse = 1
                         elseif(7.0d0.le.mc .and. mc.lt.11.0d0)then
-                            theta = 0.25d0 - (1.275d0/(mt - 1.0d0))
-                            beta = -11.d0*theta + 1.0d0
+                            thetaSN = 0.25d0 - (1.275d0/(mt - 1.0d0))
+                            betaSN = -11.d0*thetaSN + 1.0d0
                             sigmaSN = 0.0d0
                             delta = 1.0d0
                         elseif(11.0d0.le.mc)then
-                            theta = 0.0d0
-                            beta = 1.0d0
+                            thetaSN = 0.0d0
+                            betaSN = 1.0d0
                             sigmaSN = 0.0d0
                             delta = 1.0d0
 *
-                            directcollapse = 1
+*                            directcollapse = 1
                         endif
 
-                        mrem = sigmaSN*mc + delta + (theta*mc + beta)
-     &                       *(mt - sigmaSN*mc - delta)
+                        mrem = sigmaSN*mc + delta + (thetaSN*mc
+     &                        + betaSN)*(mt - sigmaSN*mc - delta)
 
                      mc = mt
                   elseif(remnantflag.eq.4)then
@@ -631,36 +631,36 @@ C      if(mt0.gt.100.d0) mt = 100.d0
 * DELAYED SN explosion by Spera et al. 2015, MNRAS, 451
 *
                         if(mc.lt.2.5d0)then
-                            theta = 0.0d0
-                            beta = 0.2d0/(mt - 1.2d0)
+                            thetaSN = 0.0d0
+                            betaSN = 0.2d0/(mt - 1.2d0)
                             sigmaSN = 0.0d0
                             delta = 1.2d0
                         elseif(2.5d0.le.mc .and. mc.lt.3.5d0)then
-                            theta = 0.0d0
-                            beta = (0.5d0*mc - 1.05d0)/(mt - 1.2d0)
+                            thetaSN = 0.0d0
+                            betaSN = (0.5d0*mc - 1.05d0)/(mt - 1.2d0)
                             sigmaSN = 0.0d0
                             delta = 1.2d0
                         elseif(3.5d0.le.mc .and. mc.lt.6.0d0)then
-                            theta = 0.133d0 - (0.093d0/(mt - 1.3d0))
-                            beta = -11.d0*theta + 1.0d0
+                            thetaSN = 0.133d0 - (0.093d0/(mt - 1.3d0))
+                            betaSN = -11.d0*thetaSN + 1.0d0
                             sigmaSN = 0.0d0
                             delta = 1.3d0
                         elseif(6.0d0.le.mc .and. mc.lt.11.0d0)then
-                            theta = 0.133d0 - (0.093d0/(mt - 1.4d0))
-                            beta = -11.d0*theta + 1.0d0
+                            thetaSN = 0.133d0 - (0.093d0/(mt - 1.4d0))
+                            betaSN = -11.d0*thetaSN + 1.0d0
                             sigmaSN = 0.0d0
                             delta = 1.4d0
                         elseif(11.d0.le.mc)then
-                            theta = 0.0d0
-                            beta = 1.0d0
+                            thetaSN = 0.0d0
+                            betaSN = 1.0d0
                             sigmaSN = 0.0d0
                             delta = 1.6d0
 *
                             directcollapse = 1
                         endif
 
-                        mrem = sigmaSN*mc + delta + (theta*mc + beta)
-     &                       *(mt - sigmaSN*mc - delta)
+                        mrem = sigmaSN*mc + delta + (thetaSN*mc 
+     &                       + betaSN)*(mt - sigmaSN*mc - delta)
                      mc = mt
                   endif
 
@@ -670,12 +670,17 @@ C      if(mt0.gt.100.d0) mt = 100.d0
 *
 * Consider the Pair-Instability and the Pulsation Pair-Instability
 *
-                    if(piflag.ge.1)then
-                        pisn_correction = pisnM(kw,mcbagb,mt)
-                    else
-                        pisn_correction = 1.d0
-                    endif
-                    mrem = pisn_correction*mrem
+              if(piflag.ge.1)then
+                  pisn_correction = pisnM(kw,mcbagb,mt)
+              else
+                  pisn_correction = 1.d0
+              endif
+              if(pisn_correction.eq.0.d0) pisn_track(kidx)=7
+            if(pisn_correction.ge.0.d0.and.pisn_correction.le.1.d0)then 
+              pisn_track(kidx)=6
+              endif
+              mrem = pisn_correction*mrem
+              mt=pisn_correction*mt
 *
                     if(mrem.eq.0.0d0)then
                        kw = 15
@@ -836,74 +841,74 @@ C      if(mt0.gt.100.d0) mt = 100.d0
 * RAPID SN explosion by Spera et al. 2015, MNRAS, 451
 *
                         if(mc.lt.2.5d0)then
-                            theta = 0.0d0
-                            beta = 0.2d0/(mt - 1.d0)
+                            thetaSN = 0.0d0
+                            betaSN = 0.2d0/(mt - 1.d0)
                             sigmaSN = 0.0d0
                             delta = 1.0d0
                         elseif(2.5d0.le.mc .and. mc.lt.6.0d0)then
-                            theta = 0.0d0
-                            beta = (0.286d0*mc - 0.514d0)/(mt - 1.0d0)
+                            thetaSN = 0.0d0
+                            betaSN = (0.286d0*mc- 0.514d0)/(mt - 1.0d0)
                             sigmaSN = 0.0d0
                             delta = 1.0d0
                         elseif(6.0d0.le.mc .and. mc.lt.7.0d0)then
-                            theta = 0.0d0
-                            beta = 1.0d0
+                            thetaSN = 0.0d0
+                            betaSN = 1.0d0
                             sigmaSN = 0.0d0
                             delta = 1.0d0
 *
-                            directcollapse = 1
+*                            directcollapse = 1
                         elseif(7.0d0.le.mc .and. mc.lt.11.0d0)then
-                            theta = 0.25d0 - (1.275d0/(mt - 1.0d0))
-                            beta = -11.d0*theta + 1.0d0
+                            thetaSN = 0.25d0 - (1.275d0/(mt - 1.0d0))
+                            betaSN = -11.d0*thetaSN + 1.0d0
                             sigmaSN = 0.0d0
                             delta = 1.0d0
                         elseif(11.0d0.le.mc)then
-                            theta = 0.0d0
-                            beta = 1.0d0
+                            thetaSN = 0.0d0
+                            betaSN = 1.0d0
                             sigmaSN = 0.0d0
                             delta = 1.0d0
 *
-                            directcollapse = 1
+*                            directcollapse = 1
                         endif
 
-                        mrem = sigmaSN*mc + delta + (theta*mc + beta)
-     &                       *(mt - sigmaSN*mc - delta)
+                        mrem = sigmaSN*mc + delta + (thetaSN*mc
+     &                        + betaSN)*(mt - sigmaSN*mc - delta)
                      mc=mt
                      elseif(remnantflag.eq.4)then
 *
 * DELAYED SN explosion by Spera et al. 2015, MNRAS, 451
 *
                          if(mc.lt.2.5d0)then
-                            theta = 0.0d0
-                            beta = 0.2d0/(mt - 1.2d0)
+                            thetaSN = 0.0d0
+                            betaSN = 0.2d0/(mt - 1.2d0)
                             sigmaSN = 0.0d0
                             delta = 1.2d0
                          elseif(2.5d0.le.mc .and. mc.lt.3.5d0)then
-                            theta = 0.0d0
-                            beta = (0.5d0*mc - 1.05d0)/(mt - 1.2d0)
+                            thetaSN = 0.0d0
+                            betaSN = (0.5d0*mc - 1.05d0)/(mt - 1.2d0)
                             sigmaSN = 0.0d0
                             delta = 1.2d0
                          elseif(3.5d0.le.mc .and. mc.lt.6.0d0)then
-                            theta = 0.133d0 - (0.093d0/(mt - 1.3d0))
-                            beta = -11.d0*theta + 1.0d0
+                            thetaSN = 0.133d0 - (0.093d0/(mt - 1.3d0))
+                            betaSN = -11.d0*thetaSN + 1.0d0
                             sigmaSN = 0.0d0
                             delta = 1.3d0        
                          elseif(6.0d0.le.mc .and. mc.lt.11.0d0)then
-                            theta = 0.133d0 - (0.093d0/(mt - 1.4d0))
-                            beta = -11.d0*theta + 1.0d0
+                            thetaSN = 0.133d0 - (0.093d0/(mt - 1.4d0))
+                            betaSN = -11.d0*thetaSN + 1.0d0
                             sigmaSN = 0.0d0
                             delta = 1.4d0
                          elseif(11.d0.le.mc)then
-                            theta = 0.0d0
-                            beta = 1.0d0
+                            thetaSN = 0.0d0
+                            betaSN = 1.0d0
                             sigmaSN = 0.0d0
                             delta = 1.6d0        
 *
                             directcollapse = 1
                         endif
 *
-                        mrem = sigmaSN*mc + delta + (theta*mc + beta)
-     &                       *(mt - sigmaSN*mc - delta)
+                        mrem = sigmaSN*mc + delta + (thetaSN*mc
+     &                        + betaSN)*(mt - sigmaSN*mc - delta)
                      mc = mt
                      endif
 
@@ -913,12 +918,17 @@ C      if(mt0.gt.100.d0) mt = 100.d0
 *
 * Consider the Pair-Instability and the Pulsation Pair-Instability
 *
-                      if(piflag.ge.1)then
-                          pisn_correction = pisnM(kw,mcbagb,mt)
-                      else
-                          pisn_correction = 1.d0
-                      endif
-                      mrem = pisn_correction*mrem
+              if(piflag.ge.1)then
+                  pisn_correction = pisnM(kw,mcbagb,mt)
+              else
+                  pisn_correction = 1.d0
+              endif
+              if(pisn_correction.eq.0.d0) pisn_track(kidx)=7
+            if(pisn_correction.ge.0.d0.and.pisn_correction.le.1.d0)then
+              pisn_track(kidx)=6
+              endif
+              mrem = pisn_correction*mrem
+              mt=pisn_correction*mt
 *
                       if(mrem.eq.0.0d0)then
                          kw = 15
