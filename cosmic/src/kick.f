@@ -23,7 +23,7 @@
       real*8 csigns
       real*8 semilatrec,cangleofdeath,angleofdeath,energy
       real*8 fallback,sigmahold,bound
-      real*8 mean_mns,mean_mej,alphakick,betakick
+      real*8 mean_mns,mean_ej,alphakick,betakick,mrem,ss
       real*8 bkick(20)
       real*8 maxwellian
       INTEGER directcollapse,ECS

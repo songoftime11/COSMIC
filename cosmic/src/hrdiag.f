@@ -23,7 +23,7 @@
 *       MS hook and more elaborate CHeB
 *
 *
-      integer kw,kwp,kidx
+      integer kw,kwp,kidx,piflag
 *
       real*8 mass,aj,mt,tm,tn,tscls(20),lums(10),GB(10),zpars(20)
       real*8 bhspin
@@ -48,6 +48,7 @@
       real*8 frac,kappa,sappa,alphap,polyfit
       real*8 am,xx,fac,rdgen,mew,lum0,kap,zeta,ahe,aco
       parameter(lum0=7.0d+04,kap=-0.5d0,ahe=4.d0,aco=16.d0)
+      parameter(piflag=1)
 *
       real*8 thookf,tblf
       real*8 lalphf,lbetaf,lnetaf,lhookf,lgbtf,lmcgbf,lzhef,lpertf
@@ -60,9 +61,9 @@
       external rzamsf,rtmsf,ralphf,rbetaf,rgammf,rhookf
       external rgbf,rminf,ragbf,rzahbf,rzhef,rhehgf,rhegbf,rpertf
       external mctmsf,mcgbtf,mcgbf,mcheif,mcagbf,lzahbf
-      real*8 sigma,theta,delta
-      real*8 pisn_correction,rcore_RGB,rcore_TPAGB,pisn
-      external rcore_RGB,rcore_TPAGB,pisn
+      real*8 sigmaSN,theta,delta
+      real*8 pisn_correction,rcore_RGB,rcore_TPAGB,pisnM
+      external rcore_RGB,rcore_TPAGB,pisnM
 *
 *
       INTEGER directcollapse,ECS
@@ -452,6 +453,12 @@ C      if(mt0.gt.100.d0) mt = 100.d0
 *
          else
             kw = 6
+*
+* This next is a brute force fix to allow negative epochs to work
+* for SAGB stars (Jarrod, 2014)
+*
+            if(aj.ge.tscls(11)-2.d0*tiny) aj = tscls(14) + 
+     &           0.95d0*(tscls(11)-tscls(14))
             mc = mcgbtf(aj,GB(2),GB,tscls(10),tscls(11),tscls(12))
             lum = lmcgbf(mc,GB)
 *
@@ -587,36 +594,36 @@ C      if(mt0.gt.100.d0) mt = 100.d0
                         if(mc.lt.2.5d0)then
                             theta = 0.0d0
                             beta = 0.2d0/(mt - 1.d0)
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.0d0
                         elseif(2.5d0.le.mc .and. mc.lt.6.0d0)then
                             theta = 0.0d0
                             beta = (0.286d0*mc - 0.514d0)/(mt - 1.0d0)
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.0d0
                         elseif(6.0d0.le.mc .and. mc.lt.7.0d0)then
                             theta = 0.0d0
                             beta = 1.0d0
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.0d0
 *
                             directcollapse = 1
                         elseif(7.0d0.le.mc .and. mc.lt.11.0d0)then
                             theta = 0.25d0 - (1.275d0/(mt - 1.0d0))
                             beta = -11.d0*theta + 1.0d0
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.0d0
                         elseif(11.0d0.le.mc)then
                             theta = 0.0d0
                             beta = 1.0d0
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.0d0
 *
                             directcollapse = 1
                         endif
 
-                        mrem = sigma*mc + delta + (theta*mc + beta)
-     &                       *(mt - sigma*mc - delta)
+                        mrem = sigmaSN*mc + delta + (theta*mc + beta)
+     &                       *(mt - sigmaSN*mc - delta)
 
                      mc = mt
                   elseif(remnantflag.eq.4)then
@@ -626,34 +633,34 @@ C      if(mt0.gt.100.d0) mt = 100.d0
                         if(mc.lt.2.5d0)then
                             theta = 0.0d0
                             beta = 0.2d0/(mt - 1.2d0)
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.2d0
                         elseif(2.5d0.le.mc .and. mc.lt.3.5d0)then
                             theta = 0.0d0
                             beta = (0.5d0*mc - 1.05d0)/(mt - 1.2d0)
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.2d0
                         elseif(3.5d0.le.mc .and. mc.lt.6.0d0)then
                             theta = 0.133d0 - (0.093d0/(mt - 1.3d0))
                             beta = -11.d0*theta + 1.0d0
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.3d0
                         elseif(6.0d0.le.mc .and. mc.lt.11.0d0)then
                             theta = 0.133d0 - (0.093d0/(mt - 1.4d0))
                             beta = -11.d0*theta + 1.0d0
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.4d0
                         elseif(11.d0.le.mc)then
                             theta = 0.0d0
                             beta = 1.0d0
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.6d0
 *
                             directcollapse = 1
                         endif
 
-                        mrem = sigma*mc + delta + (theta*mc + beta)
-     &                       *(mt - sigma*mc - delta)
+                        mrem = sigmaSN*mc + delta + (theta*mc + beta)
+     &                       *(mt - sigmaSN*mc - delta)
                      mc = mt
                   endif
 
@@ -664,7 +671,7 @@ C      if(mt0.gt.100.d0) mt = 100.d0
 * Consider the Pair-Instability and the Pulsation Pair-Instability
 *
                     if(piflag.ge.1)then
-                        pisn_correction = pisn(kw,mcbagb,mt)
+                        pisn_correction = pisnM(kw,mcbagb,mt)
                     else
                         pisn_correction = 1.d0
                     endif
@@ -768,6 +775,7 @@ C      if(mt0.gt.100.d0) mt = 100.d0
                   else
                      if(remnantflag.eq.0)then
                         mt = 1.17d0 + 0.09d0*mc
+                        mrem=mt
                      elseif(remnantflag.eq.1)then
                         if(mc.lt.2.5d0)then
                            mcx = 0.161767d0*mc + 1.067055d0
@@ -830,36 +838,36 @@ C      if(mt0.gt.100.d0) mt = 100.d0
                         if(mc.lt.2.5d0)then
                             theta = 0.0d0
                             beta = 0.2d0/(mt - 1.d0)
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.0d0
                         elseif(2.5d0.le.mc .and. mc.lt.6.0d0)then
                             theta = 0.0d0
                             beta = (0.286d0*mc - 0.514d0)/(mt - 1.0d0)
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.0d0
                         elseif(6.0d0.le.mc .and. mc.lt.7.0d0)then
                             theta = 0.0d0
                             beta = 1.0d0
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.0d0
 *
                             directcollapse = 1
                         elseif(7.0d0.le.mc .and. mc.lt.11.0d0)then
                             theta = 0.25d0 - (1.275d0/(mt - 1.0d0))
                             beta = -11.d0*theta + 1.0d0
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.0d0
                         elseif(11.0d0.le.mc)then
                             theta = 0.0d0
                             beta = 1.0d0
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.0d0
 *
                             directcollapse = 1
                         endif
 
-                        mrem = sigma*mc + delta + (theta*mc + beta)
-     &                       *(mt - sigma*mc - delta)
+                        mrem = sigmaSN*mc + delta + (theta*mc + beta)
+     &                       *(mt - sigmaSN*mc - delta)
                      mc=mt
                      elseif(remnantflag.eq.4)then
 *
@@ -868,34 +876,34 @@ C      if(mt0.gt.100.d0) mt = 100.d0
                          if(mc.lt.2.5d0)then
                             theta = 0.0d0
                             beta = 0.2d0/(mt - 1.2d0)
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.2d0
                          elseif(2.5d0.le.mc .and. mc.lt.3.5d0)then
                             theta = 0.0d0
                             beta = (0.5d0*mc - 1.05d0)/(mt - 1.2d0)
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.2d0
                          elseif(3.5d0.le.mc .and. mc.lt.6.0d0)then
                             theta = 0.133d0 - (0.093d0/(mt - 1.3d0))
                             beta = -11.d0*theta + 1.0d0
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.3d0        
                          elseif(6.0d0.le.mc .and. mc.lt.11.0d0)then
                             theta = 0.133d0 - (0.093d0/(mt - 1.4d0))
                             beta = -11.d0*theta + 1.0d0
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.4d0
                          elseif(11.d0.le.mc)then
                             theta = 0.0d0
                             beta = 1.0d0
-                            sigma = 0.0d0
+                            sigmaSN = 0.0d0
                             delta = 1.6d0        
 *
                             directcollapse = 1
                         endif
 *
-                        mrem = sigma*mc + delta + (theta*mc + beta)
-     &                       *(mt - sigma*mc - delta)
+                        mrem = sigmaSN*mc + delta + (theta*mc + beta)
+     &                       *(mt - sigmaSN*mc - delta)
                      mc = mt
                      endif
 
@@ -906,7 +914,7 @@ C      if(mt0.gt.100.d0) mt = 100.d0
 * Consider the Pair-Instability and the Pulsation Pair-Instability
 *
                       if(piflag.ge.1)then
-                          pisn_correction = pisn(kw,mcbagb,mt)
+                          pisn_correction = pisnM(kw,mcbagb,mt)
                       else
                           pisn_correction = 1.d0
                       endif
@@ -933,7 +941,6 @@ C      if(mt0.gt.100.d0) mt = 100.d0
 * Store the initial BH mass for calculating the ISCO later
                      if(Mbh_initial.eq.0)then
                         Mbh_initial = mt
-                     endif
                      endif
                   endif
                endif

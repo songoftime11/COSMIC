@@ -3,15 +3,13 @@
       IMPLICIT NONE
       INCLUDE 'const_bse.h'
       integer kw,testflag
-      real*8 lum,r,mt,mc,rl,z,teff,alpha,sigma,lgdms
+      real*8 lum,r,mt,mc,rl,z,teff,alpha,lgdms
       real*8 ad11,ad12,ad13,ad14,ad15,ad21,ad22,ad23,ad24,ad25,ad26
-      real*8 ad01,ad02,ad03,ad04,ad31,ad32,ad33,ad34
-      real*8 gamma0,beta,edfac,FOURPI,tem,ind,Xh
-      real*8 dml,dms,dmt,p0,x,xx,mew,lum0,kap,neta,bwind,mxns
-      real*8 V1,V2,ZsunM,eddington
-ù
-      parameter(lum0=7.0d+04,kap=-0.5d0,V1=1.3d0,V2=2.6d0,ZsunM=0.02)
-      common /value1/ neta,bwind,mxns
+      real*8 ad01,ad02,ad03,ad04,ad31,ad32,ad33,ad34,sigmaW
+      real*8 gamma0,edfac,FOURPI,tem,ind,Xh
+      real*8 dml,dms,dmt,p0,x,xx,mew,lum0,kap
+      real*8 V2,ZsunM,eddington
+      parameter(lum0=7.0d+04,kap=-0.5d0,V2=2.6d0,ZsunM=0.02)
       external eddington
 *
 *      windflag = 0 !BSE=0, startrack08=1, vink=2, vink+LBV for all
@@ -214,11 +212,11 @@
 * Calculate stellar wind mass loss.
 ***
 * Calculate the effective temperature (tem) by the simple formula:
-*     L = 4*pi*T^4*sigma
-	      sigma = 5.67d0*10.d0**(-5.d0)*(6.96d0*10.d0**10.d0)**2.d0
+*     L = 4*pi*T^4*sigmaW
+	      sigmaW = 5.67d0*10.d0**(-5.d0)*(6.96d0*10.d0**10.d0)**2.d0
      &        /(3.84d0*10.d0**33.d0)
 	      FOURPI = 2.d0*ACOS(-1.d0)
-	      tem = (lum/(FOURPI*r**2.d0*sigma))**(1.d0/4.d0)
+	      tem = (lum/(FOURPI*r**2.d0*sigmaW))**(1.d0/4.d0)
 *
 * Exponent of the dependence on metallicity: (Z/ZsunM)^ind
 * Dipendence on eddingtin factor taken from Chen et al., MNRAS,
@@ -253,7 +251,7 @@
 		     ad11 = 2.21d0*Log10(lum/(10.d0**5.d0))
 		     ad12 = -1.339d0*Log10(mt/30.d0)
 * V is the ration of wind velocity at inf to escape velosity.
-		     ad13 = -1.601d0*Log10(V1/2.d0)
+		     ad13 = -1.601d0*Log10(1.3d0/2.d0)
 		     ad14 = ind*Log10(z/ZsunM)
 		     ad15 = 1.071*Log10(tem/20000.d0)
 * logarithm of the mass loss rate.
@@ -295,7 +293,7 @@
 		    p0 = 10.d0**p0
 		    p0 = MIN(p0,2000.d0)
 		    dmt = -11.4d0+0.0125d0*(p0-100.d0*
-      &	    MAX(mt-2.5d0,0.d0))
+     &              MAX(mt-2.5d0,0.d0))
 		    dmt = 10.d0**dmt
 		    dmt = 1.d0*MIN(dmt,1.36d-09*lum)
 		    dms = MAX(dms,dmt)

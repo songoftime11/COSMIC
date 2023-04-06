@@ -1,5 +1,5 @@
 ***
-      real*8 FUNCTION pisn(kw,mche,mt)
+      real*8 FUNCTION pisnM(kw,mche,mt)
 *
 *     Author : N. Giacobbo
 *     Date :   27th March 2017
@@ -9,7 +9,7 @@
 *     supernova explosions.
 *     Ref: Woosley 2016 and SEVN implementation (Spera & Mapelli 2017)
 *     ----------------------------------------------------------
-*     pisn = pair instability correction
+*     pisnM = pair instability correction
 *
 *
       implicit none
@@ -18,7 +18,7 @@
 *
 * No correction
 *
-      pisn = 1.d0
+      pisnM = 1.d0
 *     
 *     Pulsation Pair Instability PPISN
 *     
@@ -34,23 +34,23 @@
             hefrac = mche/mt
             kpar = 0.67d0*hefrac + 0.1d0
             if(mche.le.37.d0)then
-               pisn = (kpar - 1.d0)/5.d0*mche + 
+               pisnM = (kpar - 1.d0)/5.d0*mche + 
      &                (37.d0 - 32.d0*kpar) / 5.d0
             elseif(mche.gt.37.d0 .and. mche.le.60.d0)then
-               pisn = kpar
+               pisnM = kpar
             else
-               pisn = - (kpar/4.d0)*mche + 16.d0*kpar
+               pisnM = - (kpar/4.d0)*mche + 16.d0*kpar
             endif
 *
 *     Pair-instability supernova: disintegrated
 *
          elseif(mche.ge.64.d0 .and. mche.lt.135.d0)then
-            pisn = 0.d0
+            pisnM = 0.d0
 *
 *     end of PISN... again standard direct collapse
 *
          else
-            pisn = 1.d0
+            pisnM = 1.d0
          endif
 
 
@@ -65,29 +65,29 @@
             
             hefrac = 1.d0
             if(mt.le.37.d0)then
-                pisn = (0.5226d0*hefrac - 0.52974d0)*(mt - 32.d0) +
+                pisnM = (0.5226d0*hefrac - 0.52974d0)*(mt - 32.d0) +
      &              1.d0
             elseif(mt.gt.37.d0 .and. mt.le.56.d0)then
                 val = (0.5226d0*hefrac - 0.52974d0)*5.d0 + 1.d0
                 if(val.lt.0.82916d0)then
-                   pisn = val
+                   pisnM = val
                 else
-                   pisn = (- 0.1381d0*hefrac + 0.1309d0)*(mt - 56.d0)
+                   pisnM = (- 0.1381d0*hefrac + 0.1309d0)*(mt - 56.d0)
      &                  + 0.82916d0
                 endif
             else
-                pisn = - 0.103645d0*mt + 6.63328d0
+                pisnM = - 0.103645d0*mt + 6.63328d0
             endif
 *
 *     Pair-instability supernova: disintegrated
 *
          elseif(mt.ge.64.d0 .and. mt.lt.135.d0)then
-            pisn = 0.d0
+            pisnM = 0.d0
 *
 *     end of PISN... again standard direct collapse
 *
          else
-            pisn = 1.d0
+            pisnM = 1.d0
          endif
 
       else
