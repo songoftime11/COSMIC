@@ -3,7 +3,7 @@
       IMPLICIT NONE
       INCLUDE 'const_bse.h'
 *
-      integer kw
+      integer kw,i
 *
       real*8 z,zpars(20)
       real*8 tm,tn,tscls(20),lums(10),GB(10)
@@ -14,9 +14,10 @@
       external rgbf,ragbf,rminf,mcgbf
 *
       include 'zdata.h'
-      real*8 msp(200),gbp(200),c(5)
+      real*8 msp(200),gbp(200),coef(8),c(5)
       common /MSCFF/ msp
       common /GBCFF/ gbp
+      common /CORER/ coef
       data c /3.040581d-01, 8.049509d-02, 8.967485d-02,
      &        8.780198d-02, 2.219170d-02/
 *
@@ -342,6 +343,21 @@
       gbp(75) = xh(88) + lzs*(xh(89) + lzs*(xh(90) + lzs*xh(91)))
       gbp(76) = xh(92) + lzs*(xh(93) + lzs*(xh(94) + lzs*xh(95)))
       gbp(77) = xh(96) + lzs*(xh(97) + lzs*(xh(98) + lzs*xh(99)))
+* rcore (for RGB)
+      i = 100
+      do while(i.lt.104)
+        coef(i-99) = xh(i) + xh(i+4)*lzs + xh(i+8)*lzs**2
+     &       + xh(i+12)*lzs**3 + xh(i+16)*lzs**4
+     &       + xh(i+20)*lzs**5
+        i = i + 1
+      end do
+* rcore (for TPAGB)
+      i = 124
+      do while(i.lt.128)
+        coef(i-119) = xh(i)
+        i = i + 1
+      end do
+*
 ***
 * finish Lbagb
       mhefl = 0.d0

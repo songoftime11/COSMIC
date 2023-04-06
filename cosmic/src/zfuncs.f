@@ -814,6 +814,62 @@
       return
       end
 ***
+      real*8 FUNCTION rcore_RGB(mc)
+      implicit none
+      integer i
+      real*8 mc,sum,rw
+      real*8 mch
+      parameter(mch=1.44d0)
+      real*8 coef(8)
+      common /CORER/ coef
+*
+* A function to evaluate core radius of RGB stars.
+* (NG 27/07/2016)
+*
+      rw = 0.0115d0*SQRT(MAX(1.48204d-06,
+     &      (mch/mc)**(2.d0/3.d0)-(mc/mch)**(2.d0/3.d0)))
+
+      i = 1
+      sum = 0
+      do while(i.lt.5)
+          sum = sum + coef(i)*mc**(i - 1)
+          i = i + 1
+      end do
+
+      rcore_RGB = sum*rw
+*
+      return
+*
+      end
+***
+      real*8 FUNCTION rcore_TPAGB(mc)
+      implicit none
+      integer i
+      real*8 mc,sum,rw
+      real*8 mch
+      parameter(mch=1.44d0)
+      real*8 coef(8)
+      common /CORER/ coef
+*
+* A function to evaluate core radius of TPAGB stars.
+* (NG 28/07/2016)
+*
+      rw = 0.0115d0*SQRT(MAX(1.48204d-06,
+     &      (mch/mc)**(2.d0/3.d0)-(mc/mch)**(2.d0/3.d0)))
+
+      i = 5
+      sum = 0
+      do while(i.lt.9)
+          sum = sum + coef(i)*mc**(i - 5)
+          i = i + 1
+      end do
+
+      rcore_TPAGB = sum*rw
+*
+      return
+*
+      end
+***
       real*8 FUNCTION rhegbf(lum)
       implicit none
       real*8 lum
@@ -842,41 +898,25 @@
       real*8 FUNCTION rpertf(m,mew,r,rc)
       implicit none
       real*8 m,mew,r,rc
-      real*8 a,b,c,q,fac,facmax
+      real*8 a,b,c,q
 *
 * A function to obtain the exponent that perturbs radius.
 *
-      if(mew.le.0.d0)then
-         rpertf = 0.d0
-      else
          a = 0.1d0
          b = 0.006d0*MAX(1.d0,2.5d0/m)
          c = 3.d0
          q = log(r/rc)
-         fac = a/q
-         facmax = -14.d0/log10(mew)
-         fac = MIN(fac,facmax)
-         rpertf = ((1.d0 + b**c)*((mew/b)**c)*(mew**fac))/
+         rpertf = ((1.d0 + b**c)*((mew/b)**c)*(mew**(a/q)))/
      &            (1.d0+(mew/b)**c)
-      endif
 *
       return
       end
 ***
-      real*8 FUNCTION vrotf(m,ST)
+      real*8 FUNCTION vrotf(m)
       implicit none
-      integer ST
       real*8 m
 *
-      if(ST.gt.0)then
-         if(m.gt.6.35d0)then
-            vrotf = (10.d0*m**(-0.0354d0))/(0.0389d0+m**(-7.95d0))
-         else
-            vrotf = (13.4d0*m**(-0.12d0))/(0.0389d0+m**(-7.95d0))
-         endif
-      else
-         vrotf = 330.d0*m**3.3d0/(15.d0 + m**3.45d0)
-      endif
+      vrotf = 330.d0*m**3.3d0/(15.d0 + m**3.45d0)
 *
       return
       end
@@ -972,47 +1012,3 @@
       return
       end
 ***
-      real*8 FUNCTION MLalpha(m,lum,kw)
-      implicit none
-      integer kw
-      real*8 m,lum,loggammae,gammae,Xh
-*
-* A function for calculating the alpha factor for metallicity-dependent
-* winds from Grafener et al. 2011
-* (MZ 04/08/19)
-*
-
-* First, determine the hydrogen fraction as in Graefener et al. 2011
-      if(kw.ge.7 .and. kw.lt.10)then
-*        WR stars
-         Xh = 0.d0
-      else
-*        Assume metallicities for different kstars
-         if(kw.eq.0 .or. kw.eq.1)then
-            Xh = 0.7d0
-         elseif(kw.eq.2)then
-            Xh = 0.6d0
-         elseif(kw.eq.3)then
-            Xh = 0.5d0
-         elseif(kw.eq.4)then
-            Xh = 0.4d0
-         elseif(kw.eq.5 .or. kw.eq.6)then
-            Xh = 0.2d0
-        endif
-      endif
-
-      loggammae = -4.813d0 + LOG10(1.d0+xh) + LOG10(lum) - LOG10(m)
-      gammae = 10.0d0**(loggammae)
-      if(gammae.gt.1d0)then
-         gammae = 1.d0
-      endif
-
-* calculate metallicity scaling parameter alpha
-      if(gammae.lt.(2.d0/3.d0))then
-         MLalpha = 0.85d0
-      elseif(gammae.ge.(2.d0/3.d0))then
-         MLalpha = 2.45d0 - (2.4d0 * gammae)
-      endif
-*
-      return
-      end
